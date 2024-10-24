@@ -43,7 +43,7 @@ FROM --platform=${platform} ${from}
 COPY ./run-on-arch-install.sh /root/run-on-arch-install.sh
 RUN chmod +x /root/run-on-arch-install.sh && /root/run-on-arch-install.sh
 EOF
-   fi
+   fi &
 }
 
 
@@ -52,7 +52,9 @@ for arch in amd64 arm32v7 arm64v8 i386 ppc64le riscv64 s390x ; do
    for ubuntu in 24.04 22.04 20.04 18.04 16.04 14.04 ; do
       # shellcheck disable=SC2001
       darch="$(echo "${arch}" | sed -e "s/arm64v8/aarch64/")"
-      makeDockerfile "Dockerfile.${darch}.ubuntu${ubuntu}" "${arch}/ubuntu:${ubuntu}" "linux/${arch}"
+      # shellcheck disable=SC2001
+      harch="$(echo "${arch}" | sed -e "s/arm64v8/arm64/" -e "s/arm32v/arm\/v/")"
+      makeDockerfile "Dockerfile.${darch}.ubuntu${ubuntu}" "${arch}/ubuntu:${ubuntu}" "linux/${harch}"
    done
 done
 
@@ -62,7 +64,9 @@ for arch in amd64 arm32v5 arm32v7 arm64v8 i386 mips64le ppc64le riscv64 s390x ; 
    for debian in stretch jessie buster bullseye bookworm trixie unstable ; do
       # shellcheck disable=SC2001
       darch="$(echo "${arch}" | sed -e "s/arm64v8/aarch64/")"
-      makeDockerfile "Dockerfile.${darch}.${debian}" "${arch}/debian:${debian}" "linux/${arch}"
+      # shellcheck disable=SC2001
+      harch="$(echo "${arch}" | sed -e "s/arm64v8/arm64/" -e "s/arm32v/arm\/v/")"
+      makeDockerfile "Dockerfile.${darch}.${debian}" "${arch}/debian:${debian}" "linux/${harch}"
    done
 done
 
@@ -73,7 +77,11 @@ for arch in amd64 arm32v7 arm64v8 ppc64le s390x ; do
       # shellcheck disable=SC2001
       darch="$(echo "${arch}" | sed -e "s/arm64v8/aarch64/")"
       # shellcheck disable=SC2001
+      harch="$(echo "${arch}" | sed -e "s/arm64v8/arm64/" -e "s/arm32v/arm\/v/")"
+      # shellcheck disable=SC2001
       dfedora=$(echo "${fedora}" | sed -e "s/^latest/_latest/")
-      makeDockerfile "Dockerfile.${darch}.fedora${dfedora}" "${arch}/fedora:${fedora}" "linux/${arch}"
+      makeDockerfile "Dockerfile.${darch}.fedora${dfedora}" "${arch}/fedora:${fedora}" "linux/${harch}"
    done
 done
+
+wait
