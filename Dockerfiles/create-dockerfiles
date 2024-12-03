@@ -36,7 +36,7 @@ function makeDockerfile ()
    local from="$2"
    local platform="$3"
 
-   if docker pull "${from}" ; then
+   if docker pull --platform=${platform} "${from}" ; then
       cat >"${file}" <<EOF
 FROM --platform=${platform} ${from}
 
