@@ -1,6 +1,12 @@
+> [!NOTE]
+> **New major release addressing sporadic segmentation faults**
+> 
+> The release 3.0.0 addresses sporadic segmentation faults noticed with recent kernel releases, please update your action to this new major release (e.g. @v3) if you start noticing random or systematic CI failures.
+
 # Run-On-Arch GitHub Action
 
 [![](https://github.com/uraimo/run-on-arch-action/workflows/test/badge.svg)](https://github.com/uraimo/run-on-arch-action)
+
 
 A GitHub Action that executes commands on non-x86 CPU architecture (armv6, armv7, aarch64, s390x, ppc64le) via QEMU.
 
@@ -9,7 +15,7 @@ A GitHub Action that executes commands on non-x86 CPU architecture (armv6, armv7
 This action requires three input parameters:
 
 * `arch`: CPU architecture: `armv6`, `armv7`, `aarch64`, `riscv64`, `s390x`, or `ppc64le`. See [Supported Platforms](#supported-platforms) for the full matrix.
-* `distro`: Linux distribution name: `ubuntu22.04`,`ubuntu20.04`, `bookworm`,`bullseye`, `buster`, `stretch`,  `fedora_latest`, `alpine_latest` or `archarm_latest`. See [Supported Platforms](#supported-platforms) for the full matrix.
+* `distro`: Linux distribution name: `ubuntu24.04`,`ubuntu22.04`,`ubuntu20.04`, `bookworm`,`bullseye`, `buster`, `stretch`,  `fedora_latest`, `alpine_latest` or `archarm_latest`. See [Supported Platforms](#supported-platforms) for the full matrix.
 * `run`: Shell commands to execute in the container.
 
 The action also accepts some optional input parameters:
@@ -20,7 +26,7 @@ The action also accepts some optional input parameters:
 * `dockerRunArgs`: Additional arguments to pass to `docker run`, such as volume mappings. See [`docker run` documentation](https://docs.docker.com/engine/reference/commandline/run).
 * `setup`: Shell commands to execute on the host before running the container, such as creating directories for volume mappings.
 * `install`: Shell commands to execute in the container as part of `docker build`, such as installing dependencies. This speeds up subsequent builds if `githubToken` is also used, but note that the image layer will be publicly available in your projects GitHub Package Registry, so make sure the resulting image does not have any secrets cached in logs or state.
-* `base_image`: Specify a custom base image, such as [busybox](https://hub.docker.com/_/busybox), `arch` and `distro` should be set to `none` in this case. This will allow you to chose direcly the image that will be used in the *FROM* clause of the internal docker container without needing to create a Dockerfile.arch.distro for a specific arch/distro pair. For more detials, see [PR #103](https://github.com/uraimo/run-on-arch-action/pull/103#issuecomment-1363810049). Known limitation: Only one base_image configuration for each workflow if you use GitHub images caching.
+* `base_image`: Specify a custom base image, `arch` and `distro` should be set to `none` in this case. This will allow you to choose direcly the image that will be used in the *FROM* clause of the internal docker container without needing to create a Dockerfile.arch.distro for a specific arch/distro pair. If required by the docker image, the architecture can be specified prepenging the platform identifier before the image name, e.g. `--platform=linux/armv7 arm32v7/debian:buster`. Known limitation: Only one base_image configuration for each workflow if you use GitHub images caching.
 
 ### Basic example
 
@@ -32,16 +38,16 @@ on: [push, pull_request]
 jobs:
   armv7_job:
     # The host should always be Linux
-    runs-on: ubuntu-22.04
-    name: Build on ubuntu-22.04 armv7
+    runs-on: ubuntu-24.04
+    name: Build on ubuntu-24.04 armv7
     steps:
       - uses: actions/checkout@v4
-      - uses: uraimo/run-on-arch-action@v2
+      - uses: uraimo/run-on-arch-action@v3
         name: Run commands
         id: runcmd
         with:
           arch: armv7
-          distro: ubuntu22.04
+          distro: ubuntu24.04
 
           # Not required, but speeds up builds by storing container images in
           # a GitHub package registry.
@@ -68,7 +74,7 @@ on: [push, pull_request]
 jobs:
   build_job:
     # The host should always be linux
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
 
     # Run steps on a matrix of 4 arch/distro combinations
@@ -76,22 +82,23 @@ jobs:
       matrix:
         include:
           - arch: aarch64
-            distro: ubuntu22.04
+            distro: ubuntu24.04
           - arch: aarch64
             distro: bullseye
           - arch: ppc64le
             distro: alpine_latest
           - arch: none
             distro: none
-            base_image: riscv64/busybox
+            base_image: --platform=linux/riscv64 riscv64/ubuntu:24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: uraimo/run-on-arch-action@v2
+      - uses: uraimo/run-on-arch-action@v3
         name: Build artifact
         id: build
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
+          base_image: ${{ matrix.base_image }}
 
           # Not required, but speeds up builds
           githubToken: ${{ github.token }}
@@ -153,11 +160,11 @@ This table details the valid `arch`/`distro` combinations:
 | arch     | distro     |
 | -------- | ---------- |
 | armv6    | stretch, buster, bullseye, bookworm, alpine_latest |
-| armv7    | stretch, buster, bullseye, bookworm, ubuntu20.04, ubuntu22.04, ubuntu_latest, ubuntu_rolling, ubuntu_devel, fedora_latest, alpine_latest, archarm_latest |
-| aarch64  | stretch, buster, bullseye, bookworm, ubuntu20.04, ubuntu22.04, ubuntu_latest, ubuntu_rolling, ubuntu_devel, fedora_latest, alpine_latest, archarm_latest |
-| riscv64  | ubuntu20.04, ubuntu22.04, ubuntu_latest, ubuntu_rolling, ubuntu_devel, alpine_edge |
-| s390x    | stretch, buster, bullseye, bookworm, ubuntu20.04, ubuntu22.04, ubuntu_latest, ubuntu_rolling, ubuntu_devel, alpine_latest |
-| ppc64le  | stretch, buster, bullseye, bookworm, ubuntu20.04, ubuntu22.04, ubuntu_latest, ubuntu_rolling, ubuntu_devel, alpine_latest |
+| armv7    | stretch, buster, bullseye, bookworm, ubuntu20.04, ubuntu22.04 ubuntu24.04,, ubuntu_latest, ubuntu_rolling, ubuntu_devel, fedora_latest, alpine_latest, archarm_latest |
+| aarch64  | stretch, buster, bullseye, bookworm, ubuntu20.04, ubuntu22.04, ubuntu24.04, ubuntu_latest, ubuntu_rolling, ubuntu_devel, fedora_latest, alpine_latest, archarm_latest |
+| riscv64  | ubuntu20.04, ubuntu22.04, ubuntu24.04, ubuntu_latest, ubuntu_rolling, ubuntu_devel, alpine_edge |
+| s390x    | stretch, buster, bullseye, bookworm, ubuntu20.04, ubuntu22.04, ubuntu24.04, ubuntu_latest, ubuntu_rolling, ubuntu_devel, alpine_latest |
+| ppc64le  | stretch, buster, bullseye, bookworm, ubuntu20.04, ubuntu22.04, ubuntu24.04, ubuntu_latest, ubuntu_rolling, ubuntu_devel, alpine_latest |
 
 
 Using an invalid `arch`/`distro` combination will fail.

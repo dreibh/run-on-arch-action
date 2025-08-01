@@ -35,9 +35,10 @@ install_deps () {
   # Install support for non-x86 emulation in Docker via QEMU.
   # Platforms: linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x,
   #            linux/386, linux/arm/v7, linux/arm/v6
-  sudo apt-get update -q -y
-  sudo apt-get -qq install -y qemu qemu-user-static
-  docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
+  sudo apt update -q -y
+  docker run --rm --privileged tonistiigi/binfmt --install all
+  #Print versions
+  docker run --privileged --rm tonistiigi/binfmt --version
 }
 
 build_container () {
@@ -141,6 +142,10 @@ quiet install_deps
 
 echo "::group::Build container"
 build_container
+echo "::endgroup::"
 
 echo "::group::Run container"
 run_container
+echo "::endgroup::"
+
+
