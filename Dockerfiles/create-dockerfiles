@@ -73,7 +73,7 @@ done
 
 # Architectures for Fedora: https://hub.docker.com/_/fedora/
 for arch in amd64 arm32v7 arm64v8 ppc64le s390x ; do
-   for fedora in 40 41 rawhide latest ; do
+   for fedora in 40 41 42 rawhide latest ; do
       # shellcheck disable=SC2001
       darch="$(echo "${arch}" | sed -e "s/arm64v8/aarch64/")"
       # shellcheck disable=SC2001
