@@ -49,7 +49,7 @@ EOF
 
 # Architectures for Ubuntu: https://hub.docker.com/_/ubuntu
 for arch in amd64 arm32v7 arm64v8 i386 ppc64le riscv64 s390x ; do
-   for ubuntu in   25.10 25.04   26.04 24.04 22.04 20.04 18.04 16.04 14.04 ; do
+   for ubuntu in   26.10   26.04 24.04 22.04 20.04 18.04 16.04 14.04 ; do
       # shellcheck disable=SC2001
       darch="$(echo "${arch}" | sed -e "s/arm64v8/aarch64/")"
       # shellcheck disable=SC2001
@@ -61,7 +61,7 @@ done
 
 # Architectures for Debian: https://hub.docker.com/_/debian
 for arch in amd64 arm32v5 arm32v7 arm64v8 i386 mips64le ppc64le riscv64 s390x ; do
-   for debian in stretch jessie buster bullseye bookworm trixie unstable ; do
+   for debian in stretch jessie buster bullseye bookworm trixie forky unstable ; do
       # shellcheck disable=SC2001
       darch="$(echo "${arch}" | sed -e "s/arm64v8/aarch64/")"
       # shellcheck disable=SC2001
@@ -73,7 +73,7 @@ done
 
 # Architectures for Fedora: https://hub.docker.com/_/fedora/
 for arch in amd64 arm32v7 arm64v8 ppc64le s390x ; do
-   for fedora in 40 41 42 43 44 rawhide latest ; do
+   for fedora in 40 41 42 43 44 45 rawhide latest ; do
       # shellcheck disable=SC2001
       darch="$(echo "${arch}" | sed -e "s/arm64v8/aarch64/")"
       # shellcheck disable=SC2001
